@@ -33,9 +33,11 @@ pip install pytest
 ```pytest -v```             - return more verbose output.
 ```pytest -vv```            - return max verbose output.
 ```pytest -s```             - allows to show print statements in the console.
+```pytest --capture=no```   - allows to show print statements in the console.
 ```pytest --tb=no```        - hide traceback.
 ```pytest --tb=short```     - shorter traceback format.
 ```pytest --setup-show```   - shows us an order of operations of tests and fixtures.
+```pytest --markers```      - print to console the list of markers.
 
 
 # Pytest commands
@@ -48,19 +50,26 @@ pip install pytest
 ```pytest -k "equality and not equality_fail```        - run all tests that contain 'equality' and not contain 'equality_fail'.
 ```pytest -k "(dict or ids) and not TestEquality```    - run all tests with 'dict' or 'ids' in name, but not ones in TestEquality class.     
 
-```pytest -m marker_name```             - run all tests whith specific marker. 
+```pytest -m marker_name```             - run all tests whith specific marker.  
+```pytest -m "marker_name1 and/or/not marker_name2..."```             - run all tests whith specific marker. 
 
 ```pytest --fixtures -v```              - return all fixtures info from current directory where we run a command (show us fixture name, scope, filename where fixture is located). Also we can add filename if we want to know the info about fixtures used in this file.  
 ```pytest --fixtures-per-test test_count.py::test_empty``` - return fixtures that used in 'test_empty' test in 'test_count.py' file.  
 
 ```pytest -s test_autouse.py```         - flag '-s' enables output capture.
 
+```pytest -v "test_func_param.py::test_finish[write a book-done]"```    - run test "test_finish" with parameters ("write a book", "done") from "test_func_param.py" file.  
+
+```pytest -v -ra```                     - flag '-ra' displayes the reason of a skiped tests after tests run.  
+
 
 
 # Pytest markers
-```@pytest.mark.skip()```   - skip run of the test.  
-```@pytest.mark.skipif()``` - skip run of the test if some condition is True.  
-```@pytest.mark.xfail()```  - marked the test that should fail as expected.  
+```@pytest.mark.skip(reason=None)```    - skip run of the test, can add a reason string.  
+```@pytest.mark.skipif(condition, ..., *, reason)```    - skip run of the test if some condition is True.  
+```@pytest.mark.xfail(condition, ..., *, reason, run=True, raises=None, strict=xfail_strict)```     - marked the test that should fail as expected.  
+```@pytest.mark.parametrize(argnames, argvalues, indirect, ids, scope)```   - calls a test function multiple times , passing in different arguments in turn.  
+```@pytest.mark.usefixtures(fixturename1, fixturename2, ...)```     - marks tests as needing all the specified fixtures.    
 
 
 # Pytest fixture scope
@@ -70,3 +79,26 @@ pip install pytest
 ```@pytest.fixture(scope="package")```      - fixture runs before/after each package (directory with test files). Need to be in a 'conftest.py' file.  
 ```@pytest.fixture(scope="session")```      - fixture runs before/after the session. Need to be in a 'conftest.py' file.  
 
+
+# Pytest buildin fixtures
+```tmp_path```              - returns a temp directory path. tmp_path is function scope  
+```
+file = tmp_path / "file.txt"
+```
+
+```tmp_path_factory```      - returns a temp path factory object. To create a new directory we should use mktemp method. tmp_path_factory is session scope  
+```
+path = tmp_path_factory.mktemp("sub")
+file = path / "file.txt"
+```
+
+```capsys```                - fixture enables the capturing of writes to stdout and stderr
+```
+# save the output of the function in 'output' variable
+output = capsys.readouterr().out.rstrip()
+```
+```
+# this code will always be displayed in console, even without the -s flag 
+with capsys.disabled():
+    print("\ncapsys disabled print")
+```
